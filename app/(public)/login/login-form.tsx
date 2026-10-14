@@ -1,0 +1,83 @@
+"use client";
+
+import { useActionState } from "react";
+import { CircleAlert, LoaderCircle } from "lucide-react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { login } from "@/features/auth/actions";
+import type { LoginFormState } from "@/features/auth/schema";
+
+const initialState: LoginFormState = {};
+
+export function LoginForm({ disabled = false }: { disabled?: boolean }) {
+  const [state, formAction, pending] = useActionState(login, initialState);
+  const fieldErrors = state.fieldErrors ?? {};
+
+  return (
+    <form action={formAction} noValidate className="grid gap-5">
+      {state.error ? (
+        <Alert variant="destructive" aria-live="polite">
+          <CircleAlert />
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      <div className="grid gap-1.5">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          placeholder="name@example.com"
+          defaultValue={state.email}
+          required
+          disabled={disabled}
+          aria-invalid={Boolean(fieldErrors.email)}
+          aria-describedby={fieldErrors.email ? "email-error" : undefined}
+          className="h-9"
+        />
+        {fieldErrors.email ? (
+          <p id="email-error" className="text-xs text-destructive">
+            {fieldErrors.email}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="grid gap-1.5">
+        <Label htmlFor="password">Password</Label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          disabled={disabled}
+          aria-invalid={Boolean(fieldErrors.password)}
+          aria-describedby={fieldErrors.password ? "password-error" : undefined}
+          className="h-9"
+        />
+        {fieldErrors.password ? (
+          <p id="password-error" className="text-xs text-destructive">
+            {fieldErrors.password}
+          </p>
+        ) : null}
+      </div>
+
+      <Button type="submit" size="lg" disabled={disabled || pending} className="w-full">
+        {pending ? (
+          <>
+            <LoaderCircle className="animate-spin" />
+            Signing in…
+          </>
+        ) : (
+          "Sign in"
+        )}
+      </Button>
+    </form>
+  );
+}
